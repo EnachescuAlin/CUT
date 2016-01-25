@@ -18,7 +18,7 @@ CUT_DEFINE_TEST(test2)
     CUT_CHECK(7 == 7);
 }
 
-CUT_DEFINE_TEST(pulaMea)
+CUT_DEFINE_TEST(test3)
 {
     int x = 5;
     int *a = &x, *b = &x;
@@ -28,5 +28,5 @@ CUT_DEFINE_TEST(pulaMea)
 CUT_DEFINE_MAIN
     CUT_CALL_TEST(test1);
     CUT_CALL_TEST(test2);
-    CUT_CALL_TEST(pulaMea);
+    CUT_CALL_TEST(test3);
 CUT_END_MAIN
