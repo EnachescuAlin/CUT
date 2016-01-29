@@ -1,10 +1,9 @@
 CFLAGS = -std=c99 -Wall
-INCLUDE = -I../include
 
 all: test
 
 test: test.c
-	gcc $(CFLAGS) -o $@ $< $(INCLUDE)
+	gcc $(CFLAGS) -o $@ $< -lcut
 
 clean:
 	rm test
