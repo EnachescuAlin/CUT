@@ -15,7 +15,8 @@
 #define BOLD    ""
 #endif
 
-
+#define FAILED 1
+#define PASSED 0
 
 #define CUT_DEFINE_TEST(x)                                                      \
     void x()                                                                    \
@@ -53,7 +54,11 @@
         printf("Passed tests:  %llu\n", CUT_getPassedTests());                  \
         printf("Failed checks: %llu\n", CUT_getFailedChecks());                 \
         printf("Passed checks: %llu\n", CUT_getPassedChecks());                 \
-        return 0;                                                               \
+        if (CUT_getFailedTests())                                               \
+        {                                                                       \
+            return FAILED;                                                      \
+        }                                                                       \
+        return PASSED;                                                          \
     }                                                                           \
 
 
