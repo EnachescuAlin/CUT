@@ -2,6 +2,7 @@
 #define C_UNIT_TESTING_FRAMEWORK
 
 #include <stdio.h>
+#include <stdint.h>
 
 #ifdef __linux__
 #define RED     "\x1B[31m"
@@ -77,6 +78,95 @@
         printf("%s(%d): \"%s\" %sfailed%s\n", __FILE__, __LINE__, #x,           \
                 RED, NORMAL);                                                   \
     }
+
+
+
+#define CUT_CHECK_OPERATOR_TEMPLATE(format,                                     \
+    actualValue, operator, expectedValue)                                       \
+    if (tmp1 operator tmp2)                                                     \
+    {                                                                           \
+        CUT_incrementPassedChecks();                                            \
+    }                                                                           \
+    else                                                                        \
+    {                                                                           \
+        CUT_incrementFailedChecks();                                            \
+        CUT_incrementFirstFailedCheck();                                        \
+        if (CUT_getFirstFailedCheck() == 1)                                     \
+            printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
+        printf("%s(%d): \"%s %s %s\" %sfailed%s"                                \
+            " => actual value = " format                                        \
+            " but expected value = " format "\n",                               \
+            __FILE__, __LINE__,                                                 \
+            #actualValue, #operator, #expectedValue,                            \
+            RED, NORMAL,                                                        \
+            tmp1, tmp2);                                                        \
+    }
+
+
+
+#define CUT_CHECK_OPERATOR_BASE(format, type,                                   \
+    actualValue, operator, expectedValue)                                       \
+    do                                                                          \
+    {                                                                           \
+        type tmp1 = (type)(actualValue);                                        \
+        type tmp2 = (type)(expectedValue);                                      \
+        CUT_CHECK_OPERATOR_TEMPLATE(format,                                     \
+            actualValue, operator, expectedValue)                               \
+    } while (0);
+
+
+
+#define CUT_CHECK_OPERATOR_INT8(actualValue, operator, expectedValue)           \
+    CUT_CHECK_OPERATOR_BASE("%hhd", int8_t,                                     \
+        actualValue, operator, expectedValue)                                   \
+
+
+
+#define CUT_CHECK_OPERATOR_UINT8(actualValue, operator, expectedValue)          \
+    CUT_CHECK_OPERATOR_BASE("%hhu", uint8_t,                                    \
+        actualValue, operator, expectedValue)
+
+
+
+#define CUT_CHECK_OPERATOR_INT16(actualValue, operator, expectedValue)          \
+    CUT_CHECK_OPERATOR_BASE("%hd", int16_t,                                     \
+        actualValue, operator, expectedValue)
+
+
+
+#define CUT_CHECK_OPERATOR_UINT16(actualValue, operator, expectedValue)         \
+    CUT_CHECK_OPERATOR_BASE("%hu", uint16_t,                                    \
+        actualValue, operator, expectedValue)
+
+
+
+#define CUT_CHECK_OPERATOR_INT32(actualValue, operator, expectedValue)          \
+    CUT_CHECK_OPERATOR_BASE("%d", int32_t,                                      \
+        actualValue, operator, expectedValue)
+
+
+
+#define CUT_CHECK_OPERATOR_UINT32(actualValue, operator, expectedValue)         \
+    CUT_CHECK_OPERATOR_BASE("%u", uint32_t,                                     \
+        actualValue, operator, expectedValue)
+
+
+
+#define CUT_CHECK_OPERATOR_INT64(actualValue, operator, expectedValue)          \
+    CUT_CHECK_OPERATOR_BASE("%lld", int64_t,                                    \
+        actualValue, operator, expectedValue)
+
+
+
+#define CUT_CHECK_OPERATOR_UINT64(actualValue, operator, expectedValue)         \
+    CUT_CHECK_OPERATOR_BASE("%llu", uint64_t,                                   \
+        actualValue, operator, expectedValue)
+
+
+
+#define CUT_CHECK_OPERATOR_ADDRESS(actualValue, operator, expectedValue)        \
+    CUT_CHECK_OPERATOR_BASE("%p", void*,                                        \
+        actualValue, operator, expectedValue)
 
 
 

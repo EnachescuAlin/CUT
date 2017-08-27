@@ -1,5 +1,6 @@
 #include <cut.h>
 #include <string.h>
+#include <stdint.h>
 
 CUT_DEFINE_TEST(test1)
 {
@@ -25,8 +26,60 @@ CUT_DEFINE_TEST(test3)
     CUT_CHECK(a == b);
 }
 
+int8_t GetNumber()
+{
+    return -100;
+}
+
+uint8_t GetUNumber()
+{
+    return 220;
+}
+
+int16_t GetInt16()
+{
+    return 15123;
+}
+
+uint16_t GetUint16()
+{
+    return 61234;
+}
+
+int32_t GetInt32()
+{
+    return -123123;
+}
+
+uint32_t GetUint32()
+{
+    return 123123;
+}
+
+CUT_DEFINE_TEST(test4)
+{
+    int8_t x = -5;
+    CUT_CHECK_OPERATOR_INT8(GetNumber(), ==, x);
+    CUT_CHECK_OPERATOR_INT8(GetNumber(), ==, 123);
+
+    uint8_t y = 240;
+    CUT_CHECK_OPERATOR_UINT8(GetUNumber(), ==, y);
+    CUT_CHECK_OPERATOR_UINT8(GetUNumber(), ==, 222);
+
+    CUT_CHECK_OPERATOR_INT16(GetInt16(), >=, 20000);
+    CUT_CHECK_OPERATOR_UINT16(GetUint16(), <=, 20000);
+
+    CUT_CHECK_OPERATOR_INT32(GetInt32(), >, 0);
+    CUT_CHECK_OPERATOR_UINT32(GetUint32(), <, 1500);
+
+    CUT_CHECK_OPERATOR_ADDRESS(GetUint32(), ==, 10000);
+    CUT_CHECK_OPERATOR_ADDRESS(GetUint32(), <, 10000);
+    CUT_CHECK_OPERATOR_ADDRESS(GetUint32(), >, 1000000);
+}
+
 CUT_DEFINE_MAIN
     CUT_CALL_TEST(test1);
     CUT_CALL_TEST(test2);
     CUT_CALL_TEST(test3);
+    CUT_CALL_TEST(test4);
 CUT_END_MAIN
