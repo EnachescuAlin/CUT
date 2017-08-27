@@ -95,11 +95,11 @@
             printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
         printf("%s(%d): \"%s %s %s\" %sfailed%s"                                \
             " => actual value = " format                                        \
-            " but expected value = " format "\n",                               \
+            " but is expected a value %s " format "\n",                         \
             __FILE__, __LINE__,                                                 \
             #actualValue, #operator, #expectedValue,                            \
             RED, NORMAL,                                                        \
-            tmp1, tmp2);                                                        \
+            tmp1, CUT_getMessageForOperator(#operator), tmp2);                  \
     }
 
 
@@ -181,6 +181,8 @@ unsigned long long int CUT_getPassedChecks(void);
 unsigned long long int CUT_getFailedChecks(void);
 unsigned long long int CUT_getPassedTests(void);
 unsigned long long int CUT_getFailedTests(void);
+
+const char* CUT_getMessageForOperator(const char *operator);
 
 #endif
 
