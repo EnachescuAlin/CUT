@@ -3,26 +3,34 @@
 
 static unsigned long long int CUT_PASSED_CHECKS      = 0, CUT_FAILED_CHECKS = 0;
 static unsigned long long int CUT_PASSED_TESTS       = 0, CUT_FAILED_TESTS  = 0;
+
+static unsigned long long int CUT_MODULE_PASSED_CHECKS      = 0, CUT_MODULE_FAILED_CHECKS = 0;
+static unsigned long long int CUT_MODULE_PASSED_TESTS       = 0, CUT_MODULE_FAILED_TESTS  = 0;
+
 static                    int CUT_FIRST_FAILED_CHECK = 0;
 
 void CUT_incrementPassedChecks(void)
 {
     CUT_PASSED_CHECKS++;
+    CUT_MODULE_PASSED_CHECKS++;
 }
 
 void CUT_incrementFailedChecks(void)
 {
     CUT_FAILED_CHECKS++;
+    CUT_MODULE_FAILED_CHECKS++;
 }
 
 void CUT_incrementPassedTests(void)
 {
     CUT_PASSED_TESTS++;
+    CUT_MODULE_PASSED_TESTS++;
 }
 
 void CUT_incrementFailedTests(void)
 {
     CUT_FAILED_TESTS++;
+    CUT_MODULE_FAILED_TESTS++;
 }
 
 void CUT_incrementFirstFailedCheck(void)
@@ -86,4 +94,33 @@ const char* CUT_getMessageForOperator(const char *operator)
     }
 
     return "<unknown>";
+}
+
+unsigned long long int CUT_getModulePassedChecks(void)
+{
+    return CUT_MODULE_PASSED_CHECKS;
+}
+
+unsigned long long int CUT_getModuleFailedChecks(void)
+{
+    return CUT_MODULE_FAILED_CHECKS;
+}
+
+unsigned long long int CUT_getModulePassedTests(void)
+{
+    return CUT_MODULE_PASSED_TESTS;
+}
+
+unsigned long long int CUT_getModuleFailedTests(void)
+{
+    return CUT_MODULE_FAILED_TESTS;
+}
+
+void CUT_reinitModuleResult(void)
+{
+    CUT_MODULE_FAILED_CHECKS = 0;
+    CUT_MODULE_PASSED_CHECKS = 0;
+
+    CUT_MODULE_FAILED_TESTS = 0;
+    CUT_MODULE_PASSED_TESTS = 0;
 }

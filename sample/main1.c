@@ -1,0 +1,9 @@
+#include <cut.h>
+
+CUT_INCLUDE_MODULE(module1);
+CUT_INCLUDE_MODULE(module2);
+
+CUT_DEFINE_MAIN
+    CUT_CALL_MODULE(module1);
+    CUT_CALL_MODULE(module2);
+CUT_END_MAIN

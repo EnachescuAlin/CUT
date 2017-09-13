@@ -49,8 +49,34 @@
 
 
 
+#define CUT_INCLUDE_MODULE(module)                                              \
+    void module()
+
+
+
+#define CUT_CALL_MODULE(module)                                                 \
+    printf("Module: %s\n", #module);                                            \
+    module();                                                                   \
+    printf("Failed tests:  %llu\n", CUT_getModuleFailedTests());                \
+    printf("Passed tests:  %llu\n", CUT_getModulePassedTests());                \
+    printf("Failed checks: %llu\n", CUT_getModuleFailedChecks());               \
+    printf("Passed checks: %llu\n\n", CUT_getModulePassedChecks());             \
+    CUT_reinitModuleResult()
+
+
+
+#define CUT_DEFINE_MODULE(module)                                               \
+    void module()                                                               \
+    {
+
+
+
+#define CUT_END_MODULE                                                          \
+    }
+
+
+
 #define CUT_END_MAIN                                                            \
-        printf("\n");                                                           \
         printf("Failed tests:  %llu\n", CUT_getFailedTests());                  \
         printf("Passed tests:  %llu\n", CUT_getPassedTests());                  \
         printf("Failed checks: %llu\n", CUT_getFailedChecks());                 \
@@ -181,6 +207,12 @@ unsigned long long int CUT_getPassedChecks(void);
 unsigned long long int CUT_getFailedChecks(void);
 unsigned long long int CUT_getPassedTests(void);
 unsigned long long int CUT_getFailedTests(void);
+
+unsigned long long int CUT_getModulePassedChecks(void);
+unsigned long long int CUT_getModuleFailedChecks(void);
+unsigned long long int CUT_getModulePassedTests(void);
+unsigned long long int CUT_getModuleFailedTests(void);
+void CUT_reinitModuleResult(void);
 
 const char* CUT_getMessageForOperator(const char *operator);
 
