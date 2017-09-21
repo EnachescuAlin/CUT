@@ -1,5 +1,6 @@
 #include <cut.h>
 #include <string.h>
+#include <stdlib.h>
 
 static unsigned long long int CUT_PASSED_CHECKS      = 0, CUT_FAILED_CHECKS = 0;
 static unsigned long long int CUT_PASSED_TESTS       = 0, CUT_FAILED_TESTS  = 0;
@@ -94,6 +95,71 @@ const char* CUT_getMessageForOperator(const char *operator)
     }
 
     return "<unknown>";
+}
+
+int CUT_getOperatorId(const char *operator)
+{
+    struct OperatorMap {
+        const char *operator;
+        int operatorId;
+    };
+
+    static struct OperatorMap operators[] = {
+        {"==", E_OPERATOR},
+        {">=", GT_OPERATOR},
+        {"<=", LT_OPERATOR},
+        {">", G_OPERATOR},
+        {"<", L_OPERATOR},
+        {"!=", NE_OPERATOR}
+    };
+
+    if (operator == NULL) {
+        printf("CUT_getOperatorId -- error, null pointer - returned E_OPERATOR\n");
+        return E_OPERATOR;
+    }
+
+    for (uint32_t i = 0; i < (sizeof(operators) / sizeof(struct OperatorMap)); i++) {
+        if (strcmp(operator, operators[i].operator) == 0) {
+            return operators[i].operatorId;
+        }
+    }
+
+    printf("CUT_getOperatorId -- error, unknown operator [%s] - returned E_OPERATOR\n", operator);
+    return E_OPERATOR;
+}
+
+char* CUT_memAreaToHexaString(const void* ptr, size_t length)
+{
+    if (ptr == NULL) {
+        return NULL;
+    }
+
+    size_t size = length * 2 + 1;
+    char *str = malloc(size);
+
+    if (str == NULL) {
+        return NULL;
+    }
+
+    static char hexaChars[] = "0123456789ABCDEF";
+    const unsigned char *p = (unsigned const char*) ptr;
+    size_t index = size - 2;
+
+    for (size_t i = 0; i < length; i++, index -= 2) {
+        str[index] = hexaChars[p[i] & 0x0F];
+        str[index - 1] = hexaChars[p[i] >> 4];
+    }
+
+    str[size - 1] = '\0';
+
+    return str;
+}
+
+void CUT_freePtr(void* ptr)
+{
+    if (ptr != NULL) {
+        free(ptr);
+    }
 }
 
 unsigned long long int CUT_getModulePassedChecks(void)

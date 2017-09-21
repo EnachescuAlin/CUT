@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #ifdef __linux__
 #define RED     "\x1B[31m"
@@ -18,6 +19,13 @@
 
 #define FAILED 1
 #define PASSED 0
+
+#define E_OPERATOR  0
+#define GT_OPERATOR 1
+#define LT_OPERATOR 2
+#define G_OPERATOR  3
+#define L_OPERATOR  4
+#define NE_OPERATOR 5
 
 #define CUT_DEFINE_TEST(x)                                                      \
     void x()                                                                    \
@@ -196,6 +204,110 @@
 
 
 
+#define CUT_CHECK_OPERATOR_STRING(actualValue, operator, expectedValue)             \
+    {                                                                               \
+        int result = strcmp(actualValue, expectedValue);                            \
+        int failed = 0;                                                             \
+        switch (CUT_getOperatorId(#operator)) {                                     \
+            case E_OPERATOR:                                                        \
+                failed = result == 0 ? 0 : 1;                                       \
+                break;                                                              \
+            case GT_OPERATOR:                                                       \
+                failed = result >= 0 ? 0 : 1;                                       \
+                break;                                                              \
+            case LT_OPERATOR:                                                       \
+                failed = result <= 0 ? 0 : 1;                                       \
+                break;                                                              \
+            case G_OPERATOR:                                                        \
+                failed = result > 0 ? 0 : 1;                                        \
+                break;                                                              \
+            case L_OPERATOR:                                                        \
+                failed = result < 0 ? 0 : 1;                                        \
+                break;                                                              \
+            case NE_OPERATOR:                                                       \
+                failed = result != 0 ? 0 : 1;                                       \
+                break;                                                              \
+            default:                                                                \
+                failed = result == 0 ? 0 : 1;                                       \
+                break;                                                              \
+        }                                                                           \
+        if (failed == 0)                                                            \
+        {                                                                           \
+            CUT_incrementPassedChecks();                                            \
+        }                                                                           \
+        else                                                                        \
+        {                                                                           \
+            CUT_incrementFailedChecks();                                            \
+            CUT_incrementFirstFailedCheck();                                        \
+            if (CUT_getFirstFailedCheck() == 1)                                     \
+                printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
+            printf("%s(%d): \"%s\" %s \"%s\" %sfailed%s"                            \
+                " => actual value = \"%s\""                                         \
+                " but is expected a value %s \"%s\"\n",                             \
+                __FILE__, __LINE__,                                                 \
+                actualValue, #operator, expectedValue,                              \
+                RED, NORMAL,                                                        \
+                actualValue, CUT_getMessageForOperator(#operator), expectedValue);  \
+        }                                                                           \
+    }
+
+
+
+#define CUT_CHECK_OPERATOR_MEMORY(actualValue, operator, expectedValue, length)     \
+    {                                                                               \
+        int result = memcmp(actualValue, expectedValue, length);                    \
+        int failed = 0;                                                             \
+        switch (CUT_getOperatorId(#operator)) {                                     \
+            case E_OPERATOR:                                                        \
+                failed = result == 0 ? 0 : 1;                                       \
+                break;                                                              \
+            case GT_OPERATOR:                                                       \
+                failed = result >= 0 ? 0 : 1;                                       \
+                break;                                                              \
+            case LT_OPERATOR:                                                       \
+                failed = result <= 0 ? 0 : 1;                                       \
+                break;                                                              \
+            case G_OPERATOR:                                                        \
+                failed = result > 0 ? 0 : 1;                                        \
+                break;                                                              \
+            case L_OPERATOR:                                                        \
+                failed = result < 0 ? 0 : 1;                                        \
+                break;                                                              \
+            case NE_OPERATOR:                                                       \
+                failed = result != 0 ? 0 : 1;                                       \
+                break;                                                              \
+            default:                                                                \
+                failed = result == 0 ? 0 : 1;                                       \
+                break;                                                              \
+        }                                                                           \
+        if (failed == 0)                                                            \
+        {                                                                           \
+            CUT_incrementPassedChecks();                                            \
+        }                                                                           \
+        else                                                                        \
+        {                                                                           \
+            char *actualValueStr = CUT_memAreaToHexaString(actualValue, length);    \
+            char *expectedValueStr = CUT_memAreaToHexaString(expectedValue, length);\
+            CUT_incrementFailedChecks();                                            \
+            CUT_incrementFirstFailedCheck();                                        \
+            if (CUT_getFirstFailedCheck() == 1)                                     \
+                printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
+            printf("%s(%d): \"%s\" %s \"%s\" %sfailed%s"                            \
+                " => actual value = \"%s\""                                         \
+                " but is expected a value %s \"%s\"\n",                             \
+                __FILE__, __LINE__,                                                 \
+                actualValueStr ? actualValueStr : "<null>", #operator,              \
+                expectedValueStr ? expectedValueStr : "<null>",                     \
+                RED, NORMAL, actualValueStr ? actualValueStr : "<null>",            \
+                CUT_getMessageForOperator(#operator),                               \
+                expectedValueStr ? expectedValueStr : "<null>");                    \
+            CUT_freePtr(actualValueStr);                                            \
+            CUT_freePtr(expectedValueStr);                                          \
+        }                                                                           \
+    }
+
+
+
 void CUT_incrementPassedChecks(void);
 void CUT_incrementFailedChecks(void);
 void CUT_incrementPassedTests(void);
@@ -215,6 +327,12 @@ unsigned long long int CUT_getModuleFailedTests(void);
 void CUT_reinitModuleResult(void);
 
 const char* CUT_getMessageForOperator(const char *operator);
+
+int CUT_getOperatorId(const char *operator);
+
+char* CUT_memAreaToHexaString(const void* ptr, size_t length);
+
+void CUT_freePtr(void* ptr);
 
 #endif
 

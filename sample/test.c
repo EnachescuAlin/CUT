@@ -77,9 +77,94 @@ CUT_DEFINE_TEST(test4)
     CUT_CHECK_OPERATOR_ADDRESS(GetUint32(), >, 1000000);
 }
 
+CUT_DEFINE_TEST(test_string)
+{
+    CUT_CHECK_OPERATOR_STRING("abc", ==, "abc");
+
+    CUT_CHECK_OPERATOR_STRING("abc", !=, "abd");
+    CUT_CHECK_OPERATOR_STRING("abc", !=, "abcd");
+
+    CUT_CHECK_OPERATOR_STRING("abc", >=, "abc");
+    CUT_CHECK_OPERATOR_STRING("abd", >=, "abc");
+    CUT_CHECK_OPERATOR_STRING("abcd", >=, "abc");
+
+    CUT_CHECK_OPERATOR_STRING("abd", >, "abc");
+    CUT_CHECK_OPERATOR_STRING("abcd", >, "abc");
+
+    CUT_CHECK_OPERATOR_STRING("abc", <, "abd");
+    CUT_CHECK_OPERATOR_STRING("abc", <, "abcd");
+
+    CUT_CHECK_OPERATOR_STRING("abc", <=, "abc");
+    CUT_CHECK_OPERATOR_STRING("abc", <=, "abd");
+    CUT_CHECK_OPERATOR_STRING("abc", <=, "abcd");
+}
+
+CUT_DEFINE_TEST(test_string2)
+{
+    CUT_CHECK_OPERATOR_STRING("abc", !=, "abc");
+
+    CUT_CHECK_OPERATOR_STRING("abc", ==, "abd");
+    CUT_CHECK_OPERATOR_STRING("abc", ==, "abcd");
+
+    CUT_CHECK_OPERATOR_STRING("abd", <=, "abc");
+    CUT_CHECK_OPERATOR_STRING("abcd", <=, "abc");
+
+    CUT_CHECK_OPERATOR_STRING("abd", <, "abc");
+    CUT_CHECK_OPERATOR_STRING("abcd", <, "abc");
+
+    CUT_CHECK_OPERATOR_STRING("abc", >, "abd");
+    CUT_CHECK_OPERATOR_STRING("abc", >, "abcd");
+
+    CUT_CHECK_OPERATOR_STRING("abc", >=, "abd");
+    CUT_CHECK_OPERATOR_STRING("abc", >=, "abcd");
+}
+
+CUT_DEFINE_TEST(test_memory)
+{
+    int a = 1, b = 1, c = 2;
+
+    CUT_CHECK_OPERATOR_MEMORY(&a, ==, &b, sizeof(int));
+
+    CUT_CHECK_OPERATOR_MEMORY(&a, !=, &c, sizeof(int));
+    CUT_CHECK_OPERATOR_MEMORY(&a, !=, &c, sizeof(int));
+
+    CUT_CHECK_OPERATOR_MEMORY(&c, >=, &a, sizeof(int));
+    CUT_CHECK_OPERATOR_MEMORY(&b, >=, &a, sizeof(int));
+
+    CUT_CHECK_OPERATOR_MEMORY(&c, >, &b, sizeof(int));
+
+    CUT_CHECK_OPERATOR_MEMORY(&a, <, &c, sizeof(int));
+
+    CUT_CHECK_OPERATOR_MEMORY(&a, <=, &b, sizeof(int));
+    CUT_CHECK_OPERATOR_MEMORY(&a, <=, &c, sizeof(int));
+}
+
+CUT_DEFINE_TEST(test_memory2)
+{
+    int a = 125, b = 125, c = 255;
+
+    CUT_CHECK_OPERATOR_MEMORY(&a, !=, &b, sizeof(int));
+
+    CUT_CHECK_OPERATOR_MEMORY(&a, ==, &c, sizeof(int));
+    CUT_CHECK_OPERATOR_MEMORY(&a, ==, &c, sizeof(int));
+
+    CUT_CHECK_OPERATOR_MEMORY(&c, <=, &a, sizeof(int));
+
+    CUT_CHECK_OPERATOR_MEMORY(&c, <, &b, sizeof(int));
+
+    CUT_CHECK_OPERATOR_MEMORY(&a, >, &c, sizeof(int));
+
+    CUT_CHECK_OPERATOR_MEMORY(&a, >=, &c, sizeof(int));
+}
+
 CUT_DEFINE_MAIN
     CUT_CALL_TEST(test1);
     CUT_CALL_TEST(test2);
     CUT_CALL_TEST(test3);
     CUT_CALL_TEST(test4);
+    CUT_CALL_TEST(test_string);
+    CUT_CALL_TEST(test_string2);
+
+    CUT_CALL_TEST(test_memory);
+    CUT_CALL_TEST(test_memory2);
 CUT_END_MAIN
