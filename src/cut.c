@@ -143,11 +143,11 @@ char* CUT_memAreaToHexaString(const void* ptr, size_t length)
 
     static char hexaChars[] = "0123456789ABCDEF";
     const unsigned char *p = (unsigned const char*) ptr;
-    size_t index = size - 2;
+    size_t index = 0;
 
-    for (size_t i = 0; i < length; i++, index -= 2) {
-        str[index] = hexaChars[p[i] & 0x0F];
-        str[index - 1] = hexaChars[p[i] >> 4];
+    for (size_t i = 0; i < length; i++, index += 2) {
+        str[index] = hexaChars[p[i] >> 4];
+        str[index + 1] = hexaChars[p[i] & 0x0F];
     }
 
     str[size - 1] = '\0';
