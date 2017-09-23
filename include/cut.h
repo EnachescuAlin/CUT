@@ -208,6 +208,22 @@
 
 
 
+#ifdef CUT_32BIT_VERSION
+#define CUT_CHECK_OPERATOR_SIZE_T(actualValue, operator, expectedValue)         \
+    CUT_CHECK_OPERATOR_BASE("%llu", uint32_t,                                   \
+        actualValue, operator, expectedValue)
+#endif
+
+
+
+#ifdef CUT_64BIT_VERSION
+#define CUT_CHECK_OPERATOR_SIZE_T(actualValue, operator, expectedValue)         \
+    CUT_CHECK_OPERATOR_BASE("%llu", uint64_t,                                   \
+        actualValue, operator, expectedValue)
+#endif
+
+
+
 #define CUT_CHECK_OPERATOR_ADDRESS(actualValue, operator, expectedValue)        \
     CUT_CHECK_OPERATOR_BASE("%p", void*,                                        \
         actualValue, operator, expectedValue)
