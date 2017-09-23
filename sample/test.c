@@ -101,7 +101,14 @@ CUT_DEFINE_TEST(test_string)
 
 CUT_DEFINE_TEST(test_string2)
 {
+    char str1[] = "\ta\tb\nc";
+    char str2[] = "\nq\twe\n";
+
     CUT_CHECK_OPERATOR_STRING("abc", !=, "abc");
+
+    CUT_CHECK_OPERATOR_STRING(str1, ==, str2);
+    CUT_CHECK_OPERATOR_STRING(str1, ==, "abd");
+    CUT_CHECK_OPERATOR_STRING("abc", ==, str2);
 
     CUT_CHECK_OPERATOR_STRING("abc", ==, "abd");
     CUT_CHECK_OPERATOR_STRING("abc", ==, "abcd");

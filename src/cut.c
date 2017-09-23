@@ -155,6 +155,64 @@ char* CUT_memAreaToHexaString(const void* ptr, size_t length)
     return str;
 }
 
+char* CUT_normalizeString(const char* str, int normalizeType)
+{
+    if (str == NULL) {
+        return NULL;
+    }
+
+    size_t i = 0;
+    size_t newLength = 0;
+    while (str[i] != '\0') {
+        i++;
+
+        if ((normalizeType & NORMALIZE_NEW_LINE) && str[i] == '\n') {
+            newLength += 2;
+            continue;
+        }
+
+        if ((normalizeType & NORMALIZE_TAB) && str[i] == '\t') {
+            newLength += 2;
+            continue;
+        }
+    }
+
+    // return NULL if there are not special chars
+    if (newLength == 0) {
+        return NULL;
+    }
+
+    newLength += i;
+
+    char *ptr = malloc(newLength + 1);
+    if (ptr == NULL) {
+        return NULL;
+    }
+
+    i = 0;
+    size_t j = 0;
+    while (str[i] != '\0') {
+        if ((normalizeType & NORMALIZE_NEW_LINE) && str[i] == '\n') {
+            ptr[j++] = '\\';
+            ptr[j++] = 'n';
+            i++;
+            continue;
+        }
+
+        if ((normalizeType & NORMALIZE_TAB) && str[i] == '\t') {
+            ptr[j++] = '\\';
+            ptr[j++] = 't';
+            i++;
+            continue;
+        }
+
+        ptr[j++] = str[i++];
+    }
+
+    ptr[j] = '\0';
+    return ptr;
+}
+
 void CUT_freePtr(void* ptr)
 {
     if (ptr != NULL) {

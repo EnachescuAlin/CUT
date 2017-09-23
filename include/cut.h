@@ -27,6 +27,16 @@
 #define L_OPERATOR  4
 #define NE_OPERATOR 5
 
+#ifndef NORMALIZE_NEW_LINE
+#define NORMALIZE_NEW_LINE 1
+#endif
+
+#ifndef NORMALIZE_TAB
+#define NORMALIZE_TAB 2
+#endif
+
+#define NORMALIZE_TYPE (NORMALIZE_NEW_LINE | NORMALIZE_TAB)
+
 #define CUT_DEFINE_TEST(x)                                                      \
     void x()                                                                    \
 
@@ -237,17 +247,25 @@
         }                                                                           \
         else                                                                        \
         {                                                                           \
+            char *actualValueNormalized =                                           \
+                CUT_normalizeString(actualValue, NORMALIZE_TYPE);                   \
+            char *expectedValueNormalized =                                         \
+                CUT_normalizeString(expectedValue, NORMALIZE_TYPE);                 \
             CUT_incrementFailedChecks();                                            \
             CUT_incrementFirstFailedCheck();                                        \
             if (CUT_getFirstFailedCheck() == 1)                                     \
                 printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
-            printf("%s(%d): \"%s\" %s \"%s\" %sfailed%s"                            \
+            printf("%s(%d): \"%s %s %s\" %sfailed%s"                                \
                 " => actual value = \"%s\""                                         \
                 " but is expected a value %s \"%s\"\n",                             \
                 __FILE__, __LINE__,                                                 \
-                actualValue, #operator, expectedValue,                              \
+                #actualValue, #operator, #expectedValue,                            \
                 RED, NORMAL,                                                        \
-                actualValue, CUT_getMessageForOperator(#operator), expectedValue);  \
+                actualValueNormalized ? actualValueNormalized : actualValue,        \
+                CUT_getMessageForOperator(#operator),                               \
+                expectedValueNormalized ? expectedValueNormalized : expectedValue); \
+            CUT_freePtr(actualValueNormalized);                                     \
+            CUT_freePtr(expectedValueNormalized);                                   \
         }                                                                           \
     }
 
@@ -292,12 +310,11 @@
             CUT_incrementFirstFailedCheck();                                        \
             if (CUT_getFirstFailedCheck() == 1)                                     \
                 printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
-            printf("%s(%d): \"%s\" %s \"%s\" %sfailed%s"                            \
+            printf("%s(%d): \"%s %s %s\" %sfailed%s"                                \
                 " => actual value = \"%s\""                                         \
                 " but is expected a value %s \"%s\"\n",                             \
                 __FILE__, __LINE__,                                                 \
-                actualValueStr ? actualValueStr : "<null>", #operator,              \
-                expectedValueStr ? expectedValueStr : "<null>",                     \
+                #actualValue, #operator, #expectedValue,                            \
                 RED, NORMAL, actualValueStr ? actualValueStr : "<null>",            \
                 CUT_getMessageForOperator(#operator),                               \
                 expectedValueStr ? expectedValueStr : "<null>");                    \
@@ -331,6 +348,8 @@ const char* CUT_getMessageForOperator(const char *operator);
 int CUT_getOperatorId(const char *operator);
 
 char* CUT_memAreaToHexaString(const void* ptr, size_t length);
+
+char* CUT_normalizeString(const char* str, int normalizeType);
 
 void CUT_freePtr(void* ptr);
 
