@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 
 #ifdef __linux__
 #define RED     "\x1B[31m"
@@ -121,6 +122,23 @@
             printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
         printf("%s(%d): \"%s\" %sfailed%s\n", __FILE__, __LINE__, #x,           \
                 RED, NORMAL);                                                   \
+    }
+
+
+#define CUT_ASSERT(x)                                                           \
+    if (x)                                                                      \
+    {                                                                           \
+        CUT_incrementPassedChecks();                                            \
+    }                                                                           \
+    else                                                                        \
+    {                                                                           \
+        CUT_incrementFailedChecks();                                            \
+        CUT_incrementFirstFailedCheck();                                        \
+        if (CUT_getFirstFailedCheck() == 1)                                     \
+            printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
+        printf("%s(%d): \"%s\" %sassert failed%s\n", __FILE__, __LINE__, #x,    \
+                RED, NORMAL);                                                   \
+        exit(1);                                                                \
     }
 
 
