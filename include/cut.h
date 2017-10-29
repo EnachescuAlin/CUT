@@ -210,7 +210,7 @@
 
 #ifdef CUT_32BIT_VERSION
 #define CUT_CHECK_OPERATOR_SIZE_T(actualValue, operator, expectedValue)         \
-    CUT_CHECK_OPERATOR_BASE("%llu", uint32_t,                                   \
+    CUT_CHECK_OPERATOR_BASE("%u", uint32_t,                                     \
         actualValue, operator, expectedValue)
 #endif
 
