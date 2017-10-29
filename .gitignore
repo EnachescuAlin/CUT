@@ -30,3 +30,8 @@
 
 # Debug files
 *.dSYM/
+
+test
+assert_sample
+module_sample1
+module_sample2
