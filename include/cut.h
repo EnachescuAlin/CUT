@@ -38,6 +38,8 @@
 
 #define NORMALIZE_TYPE (NORMALIZE_NEW_LINE | NORMALIZE_TAB)
 
+typedef void (*CUTTestPfn)();
+
 #define CUT_DEFINE_TEST(x)                                                      \
     void x()                                                                    \
 
@@ -46,13 +48,14 @@
 #define CUT_CALL_TEST(x)                                                        \
     do                                                                          \
     {                                                                           \
-        printf("%s: ", #x);                                                     \
-        CUT_resetFirstFailedCheck();                                            \
+        CUT_setTestName(#x);                                                    \
         x();                                                                    \
-        if (CUT_getFirstFailedCheck() == 0)                                     \
+        if (CUT_getTestStatus() == 0)                                           \
         {                                                                       \
             CUT_incrementPassedTests();                                         \
-            printf("%s%sPASSED%s\n", GREEN, BOLD, NORMAL);                      \
+            CUT_lockOutput();                                                   \
+            printf(#x ": %s%sPASSED%s\n", GREEN, BOLD, NORMAL);                 \
+            CUT_unlockOutput();                                                 \
         }                                                                       \
         else                                                                    \
         {                                                                       \
@@ -62,9 +65,15 @@
 
 
 
+#define CUT_CALL_TEST_ASYNC(x)                                                  \
+    CUT_launchAsync(#x, x);
+
+
+
 #define CUT_DEFINE_MAIN                                                         \
     int main(void)                                                              \
-    {
+    {                                                                           \
+        CUT_init();
 
 
 
@@ -91,16 +100,22 @@
 
 
 #define CUT_END_MODULE                                                          \
+        CUT_join();                                                             \
     }
 
 
 
 #define CUT_END_MAIN                                                            \
+        CUT_join();                                                             \
+        CUT_lockOutput();                                                       \
         printf("Failed tests:  %llu\n", CUT_getFailedTests());                  \
         printf("Passed tests:  %llu\n", CUT_getPassedTests());                  \
         printf("Failed checks: %llu\n", CUT_getFailedChecks());                 \
         printf("Passed checks: %llu\n", CUT_getPassedChecks());                 \
-        if (CUT_getFailedTests())                                               \
+        CUT_unlockOutput();                                                     \
+        unsigned long long int failedTests = CUT_getFailedTests();              \
+        CUT_uninit();                                                           \
+        if (failedTests)                                                        \
         {                                                                       \
             return FAILED;                                                      \
         }                                                                       \
@@ -117,11 +132,13 @@
     else                                                                        \
     {                                                                           \
         CUT_incrementFailedChecks();                                            \
-        CUT_incrementFirstFailedCheck();                                        \
-        if (CUT_getFirstFailedCheck() == 1)                                     \
-            printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
+        CUT_lockOutput();                                                       \
+        if (CUT_getTestStatus() == 0)                                           \
+            printf("%s: %s%sFAILED%s\n", CUT_getTestName(), RED, BOLD, NORMAL); \
         printf("%s(%d): \"%s\" %sfailed%s\n", __FILE__, __LINE__, #x,           \
                 RED, NORMAL);                                                   \
+        CUT_unlockOutput();                                                     \
+        CUT_setTestStatus(1);                                                   \
     }
 
 
@@ -133,11 +150,12 @@
     else                                                                        \
     {                                                                           \
         CUT_incrementFailedChecks();                                            \
-        CUT_incrementFirstFailedCheck();                                        \
-        if (CUT_getFirstFailedCheck() == 1)                                     \
-            printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
+        CUT_lockOutput();                                                       \
+        if (CUT_getTestStatus() == 0)                                           \
+            printf("%s: %s%sFAILED%s\n", CUT_getTestName(), RED, BOLD, NORMAL); \
         printf("%s(%d): \"%s\" %sassert failed%s\n", __FILE__, __LINE__, #x,    \
                 RED, NORMAL);                                                   \
+        CUT_unlockOutput();                                                     \
         exit(1);                                                                \
     }
 
@@ -152,9 +170,8 @@
     else                                                                        \
     {                                                                           \
         CUT_incrementFailedChecks();                                            \
-        CUT_incrementFirstFailedCheck();                                        \
-        if (CUT_getFirstFailedCheck() == 1)                                     \
-            printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
+        if (CUT_getTestStatus() == 0)                                           \
+            printf("%s: %s%sFAILED%s\n", CUT_getTestName(), RED, BOLD, NORMAL); \
         printf("%s(%d): \"%s %s %s\" %sfailed%s"                                \
             " => actual value = " format                                        \
             " but is expected a value %s " format "\n",                         \
@@ -162,6 +179,8 @@
             #actualValue, #operator, #expectedValue,                            \
             RED, NORMAL,                                                        \
             tmp1, CUT_getMessageForOperator(#operator), tmp2);                  \
+        CUT_unlockOutput();                                                     \
+        CUT_setTestStatus(1);                                                   \
     }
 
 
@@ -286,9 +305,9 @@
             char *expectedValueNormalized =                                         \
                 CUT_normalizeString(expectedValue, NORMALIZE_TYPE);                 \
             CUT_incrementFailedChecks();                                            \
-            CUT_incrementFirstFailedCheck();                                        \
-            if (CUT_getFirstFailedCheck() == 1)                                     \
-                printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
+            CUT_lockOutput();                                                       \
+            if (CUT_getTestStatus() == 0)                                           \
+                printf("%s: %s%sFAILED%s\n", CUT_getTestName(), RED, BOLD, NORMAL); \
             printf("%s(%d): \"%s %s %s\" %sfailed%s"                                \
                 " => actual value = \"%s\""                                         \
                 " but is expected a value %s \"%s\"\n",                             \
@@ -298,6 +317,8 @@
                 actualValueNormalized ? actualValueNormalized : actualValue,        \
                 CUT_getMessageForOperator(#operator),                               \
                 expectedValueNormalized ? expectedValueNormalized : expectedValue); \
+            CUT_unlockOutput();                                                     \
+            CUT_setTestStatus(1);                                                   \
             CUT_freePtr(actualValueNormalized);                                     \
             CUT_freePtr(expectedValueNormalized);                                   \
         }                                                                           \
@@ -341,9 +362,9 @@
             char *actualValueStr = CUT_memAreaToHexaString(actualValue, length);    \
             char *expectedValueStr = CUT_memAreaToHexaString(expectedValue, length);\
             CUT_incrementFailedChecks();                                            \
-            CUT_incrementFirstFailedCheck();                                        \
-            if (CUT_getFirstFailedCheck() == 1)                                     \
-                printf("%s%sFAILED%s\n", RED, BOLD, NORMAL);                        \
+            CUT_lockOutput();                                                       \
+            if (CUT_getTestStatus() == 0)                                           \
+                printf("%s: %s%sFAILED%s\n", CUT_getTestName(), RED, BOLD, NORMAL); \
             printf("%s(%d): \"%s %s %s\" %sfailed%s"                                \
                 " => actual value = \"%s\""                                         \
                 " but is expected a value %s \"%s\"\n",                             \
@@ -352,20 +373,38 @@
                 RED, NORMAL, actualValueStr ? actualValueStr : "<null>",            \
                 CUT_getMessageForOperator(#operator),                               \
                 expectedValueStr ? expectedValueStr : "<null>");                    \
+            CUT_unlockOutput();                                                     \
+            CUT_setTestStatus(1);                                                   \
             CUT_freePtr(actualValueStr);                                            \
             CUT_freePtr(expectedValueStr);                                          \
         }                                                                           \
     }
 
 
+#ifdef CUT_SOURCE
+extern "C" {
+#endif
+
+void CUT_init(void);
+void CUT_uninit(void);
+
+void CUT_join(void);
+
+void CUT_lockOutput(void);
+void CUT_unlockOutput(void);
+
+int CUT_getTestStatus(void);
+void CUT_setTestStatus(int);
+
+const char* CUT_getTestName(void);
+void CUT_setTestName(const char*);
+
+void CUT_launchAsync(const char*, CUTTestPfn);
 
 void CUT_incrementPassedChecks(void);
 void CUT_incrementFailedChecks(void);
 void CUT_incrementPassedTests(void);
 void CUT_incrementFailedTests(void);
-void CUT_incrementFirstFailedCheck(void);
-void CUT_resetFirstFailedCheck(void);
-int CUT_getFirstFailedCheck(void);
 unsigned long long int CUT_getPassedChecks(void);
 unsigned long long int CUT_getFailedChecks(void);
 unsigned long long int CUT_getPassedTests(void);
@@ -377,15 +416,19 @@ unsigned long long int CUT_getModulePassedTests(void);
 unsigned long long int CUT_getModuleFailedTests(void);
 void CUT_reinitModuleResult(void);
 
-const char* CUT_getMessageForOperator(const char *operator);
+const char* CUT_getMessageForOperator(const char *op);
 
-int CUT_getOperatorId(const char *operator);
+int CUT_getOperatorId(const char *op);
 
 char* CUT_memAreaToHexaString(const void* ptr, size_t length);
 
 char* CUT_normalizeString(const char* str, int normalizeType);
 
 void CUT_freePtr(void* ptr);
+
+#ifdef CUT_SOURCE
+}
+#endif
 
 #endif
 

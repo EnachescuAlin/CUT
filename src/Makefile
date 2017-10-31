@@ -1,14 +1,14 @@
-CFLAGS  = -std=c99 -fpic -Wall $(platform) -c -o
+CFLAGS  = -std=c++11 -fpic -Wall $(platform) -c -o
 INCLUDE = -I../include
 
 all: cut.o libcut.so
 
-cut.o: cut.c
+cut.o: cut.cpp
 	mkdir -p ../bin
-	gcc $(CFLAGS) ../bin/cut.o $< $(INCLUDE)
+	g++ $(CFLAGS) ../bin/cut.o $< $(INCLUDE)
 
 libcut.so: cut.o
-	gcc -shared $(platform) -o ../bin/libcut.so ../bin/cut.o
+	g++ -shared $(platform) -o ../bin/libcut.so ../bin/cut.o
 
 clean:
 	rm -r ../bin
